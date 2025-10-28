@@ -17,6 +17,7 @@ public class EventController {
 
     private final EventService service;
 
+    @GetMapping
     public Event findByFilters(EventFilters filters) {
         return service.findByFilters(filters);
     }
@@ -24,7 +25,6 @@ public class EventController {
     @GetMapping("/all")
     public List<Event> findAll(){
         return service.findAll();
-
     }
 
 }
