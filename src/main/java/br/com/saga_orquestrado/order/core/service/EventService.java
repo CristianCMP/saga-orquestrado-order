@@ -1,12 +1,18 @@
 package br.com.saga_orquestrado.order.core.service;
 
+import br.com.saga_orquestrado.order.config.exception.ValidationException;
 import br.com.saga_orquestrado.order.core.document.Event;
+import br.com.saga_orquestrado.order.core.dto.EventFilters;
 import br.com.saga_orquestrado.order.core.repository.EventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Slf4j
 @Service
@@ -26,5 +32,37 @@ public class EventService {
 
     public Event save(Event event) {
         return repository.save(event);
+    }
+
+    public List<Event> findAll() {
+        return repository.findAllByOrderByCreatedAtDesc();
+    }
+
+    public Event findByFilters(EventFilters filters) {
+        validateEmptyFilters(filters);
+
+        if (!ObjectUtils.isEmpty(filters.getOrderId())) {
+            return findByOrderId(filters.getOrderId());
+        } else {
+            return findByTransactionId(filters.getTransactionId());
+        }
+    }
+
+    private void validateEmptyFilters(EventFilters filters) {
+        if (isEmpty(filters.getOrderId()) && isEmpty(filters.getTransactionId())) {
+            throw new ValidationException("OrderID or TransactionID must be informed.");
+        }
+    }
+
+    private Event findByTransactionId(String transactionId) {
+        return repository
+                .findTop1ByTransactionIdOrderByCreatedAtDesc(transactionId)
+                .orElseThrow(() -> new ValidationException("Event not found by transactionId."));
+    }
+
+    private Event findByOrderId(String orderId) {
+        return repository
+                .findTop1ByOrderIdOrderByCreatedAtDesc(orderId)
+                .orElseThrow(() -> new ValidationException("Event not found by orderID."));
     }
 }
