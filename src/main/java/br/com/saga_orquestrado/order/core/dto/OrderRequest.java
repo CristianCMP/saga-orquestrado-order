@@ -1,5 +1,6 @@
 package br.com.saga_orquestrado.order.core.dto;
 
+import br.com.saga_orquestrado.order.core.document.OrderProducts;
 import br.com.saga_orquestrado.order.core.document.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderRequest {
 
-    private List<Product> products;
+    private List<OrderProducts> products;
 }
